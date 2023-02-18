@@ -1,0 +1,9 @@
+*
+!*.h
+!*.c
+!.vscode
+!.vscode/*
+!.*
+!*.md
+!sm3
+!sm4

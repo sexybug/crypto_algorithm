@@ -224,7 +224,7 @@ static void decrypt(const uint32_t *X, const uint32_t *rk, uint32_t *Y)
  * @param MK 输入，加密密钥
  * @param rk 输出，轮密钥
  */
-void key_extension(const uint32_t *MK, uint32_t *rk)
+static void key_extension(const uint32_t *MK, uint32_t *rk)
 {
     uint32_t K[36];
     K[0] = MK[0] ^ FK[0];
