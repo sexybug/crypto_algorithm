@@ -4,9 +4,9 @@
  * @brief GB_T 32907-2016信息安全技术 SM4分组密码算法 示例2测试
  * @version 0.1
  * @date 2023-02-18
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #include "sm4.h"
@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     for (int i = 0; i < 1000000; i++)
     {
         SM4_Encrypt(key, p, 16, c);
-        memcpy(p,c,16);
+        memcpy(p, c, 16);
     }
 
     dump_mem(c, 16);

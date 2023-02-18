@@ -4,9 +4,9 @@
  * @brief GB_T 32907-2016信息安全技术 SM4分组密码算法 c语言实现
  * @version 0.1
  * @date 2023-02-18
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 #include "sm4.h"
 
