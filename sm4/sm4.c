@@ -69,7 +69,7 @@ static inline uint8_t byte_at(uint32_t X, int i)
  * @param X uint8数组，长度128bit
  * @param Y uint32数组
  */
-static inline void u8_2_u32_128(const uint8_t *X, uint32_t *Y)
+static void u8_2_u32_128(const uint8_t *X, uint32_t *Y)
 {
     for (int i = 0; i < 4; i++)
     {
@@ -83,7 +83,7 @@ static inline void u8_2_u32_128(const uint8_t *X, uint32_t *Y)
  * @param X uint32数组，长度128bit
  * @param Y uint8数组
  */
-static inline void u32_2_u8_128(const uint32_t *X, uint8_t *Y)
+static void u32_2_u8_128(const uint32_t *X, uint8_t *Y)
 {
     for (int i = 0; i < 4; i++)
     {
@@ -256,7 +256,7 @@ void SM4_KeySchedule(const uint8_t *key, uint32_t *rk)
  *
  * @param key 128bit密钥
  * @param in 明文输入
- * @param inlen 明文长度
+ * @param inlen 明文长度(in Byte)
  * @param out 密文输出
  */
 void SM4_Encrypt(const uint8_t *key, const uint8_t *in, int inlen, uint8_t *out)
@@ -278,7 +278,7 @@ void SM4_Encrypt(const uint8_t *key, const uint8_t *in, int inlen, uint8_t *out)
  *
  * @param key 128bit密钥
  * @param in 密文输入
- * @param inlen 密文长度
+ * @param inlen 密文长度(in Byte)
  * @param out 明文输出
  */
 void SM4_Decrypt(const uint8_t *key, const uint8_t *in, int inlen, uint8_t *out)

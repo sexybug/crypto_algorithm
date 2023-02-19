@@ -18,7 +18,7 @@
  *
  * @param key 128bit密钥
  * @param in 明文输入
- * @param inlen 明文长度
+ * @param inlen 明文长度(in Byte)
  * @param out 密文输出
  */
 void SM4_Encrypt(const uint8_t *key, const uint8_t *in, int inlen, uint8_t *out);
@@ -28,7 +28,7 @@ void SM4_Encrypt(const uint8_t *key, const uint8_t *in, int inlen, uint8_t *out)
  *
  * @param key 128bit密钥
  * @param in 密文输入
- * @param inlen 密文长度
+ * @param inlen 密文长度(in Byte)
  * @param out 明文输出
  */
 void SM4_Decrypt(const uint8_t *key, const uint8_t *in, int inlen, uint8_t *out);

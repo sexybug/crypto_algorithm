@@ -14,7 +14,8 @@
 
 int main(int argc, char **argv)
 {
-    uint8_t p_str[] = "0123456789ABCDEFFEDCBA9876543210";
+    uint8_t p_str[32] = "0123456789ABCDEFFEDCBA9876543210";
+    uint8_t c_str[32] = "681EDF34D206965E86B3E94F536E4246";
     uint8_t p[16];
     HexString2Hex(p_str, 32, p);
     uint8_t key[16];

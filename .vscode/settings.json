@@ -3,6 +3,7 @@
         "test.h": "c",
         "stdint.h": "c",
         "stdlib.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "sm3.h": "c"
     }
 }
