@@ -181,7 +181,7 @@ static void CF(const uint32_t *Vi, const uint32_t *Bi, uint32_t *V1)
 
 /**
  * @brief 填充
- * 
+ *
  * @param m 原始输入消息
  * @param mlen 消息长度（in Byte)
  * @param pad_blocks 填充后待压缩数据
@@ -227,7 +227,7 @@ static void sm3_padding(const uint8_t *m, int mlen, uint8_t *pad_blocks, int *pa
 
 /**
  * @brief sm3摘要函数
- * 
+ *
  * @param m 输入
  * @param mlen 输入消息长度（in Byte）
  * @param out 输出：256bit摘要
