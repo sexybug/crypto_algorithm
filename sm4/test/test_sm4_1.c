@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2023
  *
  */
-#include "sm4.h"
-#include "../test.h"
+#include "../sm4.h"
+#include "../../test.h"
 #include <stdio.h>
 
 int main(int argc, char **argv)

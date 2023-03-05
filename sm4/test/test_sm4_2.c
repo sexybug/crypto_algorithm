@@ -9,8 +9,8 @@
  *
  */
 
-#include "sm4.h"
-#include "../test.h"
+#include "../sm4.h"
+#include "../../test.h"
 #include <stdio.h>
 #include <string.h>
 

@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2023
  *
  */
-#include "sm3.h"
-#include "../test.h"
+#include "../sm3.h"
+#include "../../test.h"
 #include <stdio.h>
 
 int main(int argc, char **argv)
