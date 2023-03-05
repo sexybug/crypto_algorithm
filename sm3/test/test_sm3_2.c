@@ -18,8 +18,8 @@ int main(int argc, char **argv)
                          "6162636461626364616263646162636461626364616263646162636461626364";
     uint8_t hash_str[] = "debe9ff92275b8a138604889c18e5a4d6fdb70e5387e5765293dcba39c0c5732";
     uint8_t m[64];
-    HexString2Hex(m_str, 128, m);
     int mlen = 64;
+    HexString2Hex(m_str, mlen*2, m);
     uint8_t out[32];
 
     sm3(m, mlen, out);

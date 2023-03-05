@@ -18,11 +18,11 @@
 
 /**
  * @brief sm3摘要函数
- * 
- * @param m 输入
- * @param mlen 输入消息长度（in Byte）
- * @param out 输出：256bit摘要
+ *
+ * @param msg 输入
+ * @param msg_len 输入消息长度（in Byte）
+ * @param digest 输出：256bit摘要
  */
-void sm3(const uint8_t *m, int mlen, uint8_t *out);
+void sm3(const uint8_t *msg, int msg_len, uint8_t *digest);
 
 #endif /* _SM3_H_ */

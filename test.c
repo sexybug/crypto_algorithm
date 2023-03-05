@@ -7,11 +7,12 @@ void dump_mem(const void *ptr, int len)
     for (int i = 0; i < len; ++i)
     {
         if (i % 8 == 0 && i != 0)
-            printf("");
-        // printf(" ");
+        {
+            // printf(" ");
+        }
         if (i % 32 == 0 && i != 0)
             printf("\n");
-        printf("%02X", *((uint8_t *)ptr + i));
+        printf("%02x", *((uint8_t *)ptr + i));
         // printf("%02x ", *((uint8_t *)ptr + i));
     }
     printf("\n");

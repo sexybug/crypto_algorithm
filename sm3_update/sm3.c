@@ -1,4 +1,5 @@
 #include "sm3.h"
+#include <string.h>
 
 static const uint32_t IV[8] = {0x7380166F, 0x4914B2B9, 0x172442D7, 0xDA8A0600, 0xA96F30BC, 0x163138AA, 0xE38DEE4D, 0xB0FB0E4E};
 static const uint32_t T0 = 0x79CC4519;
@@ -177,51 +178,138 @@ static void CF(const uint32_t *Vi, const uint32_t *Bi, uint32_t *V1)
     V1[6] = G ^ Vi[6];
     V1[7] = H ^ Vi[7];
 }
-
 /**
  * @brief 填充
  *
- * @param m 原始输入消息
  * @param mlen 消息长度（in Byte)
- * @param pad_blocks 填充后待压缩数据
- * @param pad_blocks_len 填充后待压缩数据长度（in Byte)
+ * @param padding 填充的数据
+ * @param padding_len 填充数据长度（in Byte)
  */
-static void sm3_padding(const uint8_t *m, int mlen, uint8_t *pad_blocks, int *pad_blocks_len)
+static void gen_padding(int msg_len, uint8_t *padding, int *padding_len)
 {
-    int block_len = 0;
-    // 复制非整512分组数据。如果消息m是整512分组，则不复制任何数据。
-    for (int i = mlen - mlen % SM3_BLOCK_SIZE; i < mlen; i++)
-    {
-        pad_blocks[block_len] = m[i];
-        block_len++;
-    }
-    // 在末尾添加1
-    pad_blocks[block_len] = 0x80;
-    block_len++;
+    int buf_len = msg_len % SM3_BLOCK_SIZE;
+    padding[0] = 0x80;
+    buf_len++;
+    int pad_len = 1;
+
     // 填充0
-    // 情形1：1个分组够用
-    if ((block_len + 8) <= SM3_BLOCK_SIZE)
+    int pad_zero_len = ((buf_len + 8) <= SM3_BLOCK_SIZE) ? (SM3_BLOCK_SIZE - 8) : (SM3_BLOCK_SIZE * 2 - 8);
+    while (buf_len < pad_zero_len)
     {
-        while (block_len < (SM3_BLOCK_SIZE - 8))
+        padding[pad_len] = 0;
+        buf_len++;
+        pad_len++;
+    }
+    // 填充64bit表示的消息长度
+    uint64_t bit_len = msg_len * 8;
+    u64_2_u8(bit_len, padding + pad_len);
+    pad_len += 8;
+    *padding_len = pad_len;
+}
+
+int sm3_init(sm3_ctx_t *ctx)
+{
+    if (ctx == NULL)
+        return 0;
+
+    for (int i = 0; i < 8; i++)
+    {
+        ctx->digest[i] = IV[i];
+    }
+    ctx->msg_total_len = 0;
+
+    return 1;
+}
+int sm3_update(sm3_ctx_t *ctx, uint8_t *msg, size_t msg_len)
+{
+    if (ctx == NULL)
+        return 0;
+
+    uint32_t B[16];
+
+    int buf_len = ctx->msg_total_len % SM3_BLOCK_SIZE;
+    ctx->msg_total_len += msg_len;
+
+    if (buf_len > 0)
+    {
+        if ((buf_len + msg_len) < SM3_BLOCK_SIZE)
         {
-            pad_blocks[block_len] = 0;
-            block_len++;
+            memcpy(ctx->buf + buf_len, msg, msg_len);
+            return 1;
+        }
+        else
+        {
+            int copy_len = SM3_BLOCK_SIZE - buf_len;
+            memcpy(ctx->buf + buf_len, msg, copy_len);
+
+            u8_2_u32_512(ctx->buf, B);
+            CF(ctx->digest, B, ctx->digest);
+
+            msg += copy_len;
+            msg_len -= copy_len;
         }
     }
-    // 情形2：需要再加1个分组
+    while (msg_len >= SM3_BLOCK_SIZE)
+    {
+        u8_2_u32_512(msg, B);
+        CF(ctx->digest, B, ctx->digest);
+
+        msg += SM3_BLOCK_SIZE;
+        msg_len -= SM3_BLOCK_SIZE;
+    }
+    if (msg_len > 0)
+    {
+        memcpy(ctx->buf, msg, msg_len);
+    }
+
+    return 1;
+}
+int sm3_final(sm3_ctx_t *ctx, uint8_t *digest)
+{
+    if (ctx == NULL)
+        return 0;
+
+    uint32_t B[16];
+
+    int buf_len = ctx->msg_total_len % SM3_BLOCK_SIZE;
+    ctx->buf[buf_len] = 0x80;
+    buf_len++;
+
+    if ((buf_len + 8) <= SM3_BLOCK_SIZE)
+    {
+        while (buf_len < (SM3_BLOCK_SIZE - 8))
+        {
+            ctx->buf[buf_len] = 0;
+            buf_len++;
+        }
+    }
     else
     {
-        while (block_len < (SM3_BLOCK_SIZE * 2 - 8))
+        while (buf_len < SM3_BLOCK_SIZE)
         {
-            pad_blocks[block_len] = 0;
-            block_len++;
+            ctx->buf[buf_len] = 0;
+            buf_len++;
+        }
+
+        u8_2_u32_512(ctx->buf, B);
+        CF(ctx->digest, B, ctx->digest);
+
+        buf_len = 0;
+        while (buf_len < (SM3_BLOCK_SIZE - 8))
+        {
+            ctx->buf[buf_len] = 0;
+            buf_len++;
         }
     }
-    // 最后填充64bit表示的长度l
-    uint64_t l = mlen * 8;
-    u64_2_u8(l, pad_blocks + block_len);
-    block_len += 8;
-    *pad_blocks_len = block_len;
+    // 填充64bit表示的消息长度
+    uint64_t bit_len = ctx->msg_total_len * 8;
+    u64_2_u8(bit_len, ctx->buf + buf_len);
+
+    u8_2_u32_512(ctx->buf, B);
+    CF(ctx->digest, B, ctx->digest);
+
+    u32_2_u8_256(ctx->digest, digest);
+    return 1;
 }
 
 /**
@@ -233,40 +321,9 @@ static void sm3_padding(const uint8_t *m, int mlen, uint8_t *pad_blocks, int *pa
  */
 void sm3(const uint8_t *msg, int msg_len, uint8_t *digest)
 {
-    uint32_t V[8], B[16], V1[8];
-    for (int i = 0; i < 8; i++)
-    {
-        V[i] = IV[i];
-    }
-    // 压缩非填充分组
-    for (int i = 0; i < msg_len / SM3_BLOCK_SIZE; i++)
-    {
-        u8_2_u32_512(msg + i * SM3_BLOCK_SIZE, B);
-        CF(V, B, V1);
-        for (int j = 0; j < 8; j++)
-        {
-            V[j] = V1[j];
-        }
-    }
+    sm3_ctx_t ctx;
 
-    // 填充，填充后的分组可能为1个512bit分组，也可能为2个512bit分组
-    uint8_t pad_blocks[SM3_BLOCK_SIZE * 2];
-    int pad_blocks_len = 0;
-    sm3_padding(msg, msg_len, pad_blocks, &pad_blocks_len);
-
-    // 压缩填充后的分组
-    u8_2_u32_512(pad_blocks, B);
-    CF(V, B, V1);
-    pad_blocks_len -= SM3_BLOCK_SIZE;
-    if (pad_blocks_len > 0)
-    {
-        for (int j = 0; j < 8; j++)
-        {
-            V[j] = V1[j];
-        }
-        u8_2_u32_512(pad_blocks + SM3_BLOCK_SIZE, B);
-        CF(V, B, V1);
-    }
-
-    u32_2_u8_256(V1, digest);
+    sm3_init(&ctx);
+    sm3_update(&ctx, msg, msg_len);
+    sm3_final(&ctx, digest);
 }
