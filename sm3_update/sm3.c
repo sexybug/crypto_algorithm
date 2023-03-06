@@ -275,15 +275,7 @@ int sm3_final(sm3_ctx_t *ctx, uint8_t *digest)
     ctx->buf[buf_len] = 0x80;
     buf_len++;
 
-    if ((buf_len + 8) <= SM3_BLOCK_SIZE)
-    {
-        while (buf_len < (SM3_BLOCK_SIZE - 8))
-        {
-            ctx->buf[buf_len] = 0;
-            buf_len++;
-        }
-    }
-    else
+    if ((buf_len + 8) > SM3_BLOCK_SIZE)
     {
         while (buf_len < SM3_BLOCK_SIZE)
         {
@@ -295,11 +287,12 @@ int sm3_final(sm3_ctx_t *ctx, uint8_t *digest)
         CF(ctx->digest, B, ctx->digest);
 
         buf_len = 0;
-        while (buf_len < (SM3_BLOCK_SIZE - 8))
-        {
-            ctx->buf[buf_len] = 0;
-            buf_len++;
-        }
+    }
+
+    while (buf_len < (SM3_BLOCK_SIZE - 8))
+    {
+        ctx->buf[buf_len] = 0;
+        buf_len++;
     }
     // 填充64bit表示的消息长度
     uint64_t bit_len = ctx->msg_total_len * 8;
