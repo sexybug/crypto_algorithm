@@ -11,18 +11,20 @@
 #include "../sm3.h"
 #include "../../test.h"
 #include <stdio.h>
+#include <string.h>
 
 int main(int argc, char **argv)
 {
     uint8_t m_str[6] = "616263";
-    uint8_t hash_str[] = "66c7f0f462eeedd9d1f2d46bdc10e4e24167c4875cf2f7a2297da02b8f4ba8e0";
-    uint8_t m[3];
+    uint8_t hash_str[64] = "66c7f0f462eeedd9d1f2d46bdc10e4e24167c4875cf2f7a2297da02b8f4ba8e0";
+    uint8_t m[3], hash[32], out[32];
     int mlen = 3;
     HexString2Hex(m_str, mlen * 2, m);
-    uint8_t out[32];
+    HexString2Hex(hash_str, 64, hash);
 
     sm3(m, mlen, out);
     printf("hash:\n");
     dump_mem(out, 32);
+    printf("memcmp result: %d\n"), memcmp(out, hash, 32);
     return 0;
 }
