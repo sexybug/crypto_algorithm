@@ -26,26 +26,26 @@ typedef struct
 
 /**
  * @brief 初始化上下文
- * 
- * @param ctx 
+ *
+ * @param ctx
  * @return int 0：失败，1：成功
  */
 int sm3_init(sm3_ctx_t *ctx);
 
 /**
  * @brief 输入消息，可多次输入
- * 
- * @param ctx 
+ *
+ * @param ctx
  * @param msg 消息
  * @param msg_len 消息长度（in Byte)
  * @return int 0：失败，1：成功
  */
-int sm3_update(sm3_ctx_t *ctx, uint8_t *msg, size_t msg_len);
+int sm3_update(sm3_ctx_t *ctx, const uint8_t *msg, size_t msg_len);
 
 /**
  * @brief 输出摘要
- * 
- * @param ctx 
+ *
+ * @param ctx
  * @param digest 摘要
  * @return int 0：失败，1：成功
  */

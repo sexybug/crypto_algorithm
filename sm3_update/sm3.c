@@ -220,7 +220,7 @@ int sm3_init(sm3_ctx_t *ctx)
 
     return 1;
 }
-int sm3_update(sm3_ctx_t *ctx, uint8_t *msg, size_t msg_len)
+int sm3_update(sm3_ctx_t *ctx, const uint8_t *msg, size_t msg_len)
 {
     if (ctx == NULL)
         return 0;
