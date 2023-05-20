@@ -4,6 +4,7 @@
         "stdint.h": "c",
         "stdlib.h": "c",
         "stdio.h": "c",
-        "sm3.h": "c"
+        "sm3.h": "c",
+        "aes.h": "c"
     }
 }
