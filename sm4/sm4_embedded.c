@@ -251,17 +251,6 @@ void SM4_Encrypt(const uint8_t *key, const uint8_t *in, int inlen, uint8_t *out)
     uint32_t P[4], C[4];
     SM4_KeySchedule(key, rk);
 
-    for(int i=0;i<4;i++)
-    {
-        printf("rk[%d] = %08x\n",i,rk[i]);
-    }
-    uint8_t rk_bytes[16];
-    u32_2_u8_128(rk, rk_bytes);
-    for(int i=0;i<4;i++)
-    {
-        printf("rk[%d] = %d %d %d %d\n",i,rk_bytes[4*i+0],rk_bytes[4*i+1],rk_bytes[4*i+2],rk_bytes[4*i+3]);
-    }
-
     for (int i = 0; i < inlen / 16; i++)
     {
         u8_2_u32_128(in + i * 16, P);

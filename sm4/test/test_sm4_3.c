@@ -14,16 +14,10 @@
 
 int main(int argc, char **argv)
 {
-    // uint8_t p_str[32] = "000102030405060708090A0B0C0D0E0F";
+    uint8_t p_str[32] = "000102030405060708090A0B0C0D0E0F";
     // uint8_t key_str[32] = "2b7e151628aed2a6abf7158809cf4f3c";    //sm4.ets
-    // // uint8_t key_str[32] = "01010101010101010101010101010101";
-    // uint8_t c_str[32] = "681EDF34D206965E86B3E94F536E4246";
-
-    uint8_t p_str[32] = "11223344556677889900112233445566";
-    uint8_t key_str[32] = "01020304050607080910111213141516";    //sm4.ets
-    // uint8_t key_str[32] = "01010101010101010101010101010101";
+    uint8_t key_str[32] = "01010101010101010101010101010101";
     uint8_t c_str[32] = "681EDF34D206965E86B3E94F536E4246";
-
     uint8_t p[16];
     HexString2Hex(p_str, 32, p);
     uint8_t key[16];
