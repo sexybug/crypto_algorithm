@@ -25,6 +25,6 @@ int main(int argc, char **argv)
     sm3(m, mlen, out);
     printf("hash:\n");
     dump_mem(out, 32);
-    printf("memcmp result: %d\n"), memcmp(out, hash, 32);
+    printf("memcmp result: %d\n", memcmp(out, hash, 32));
     return 0;
 }

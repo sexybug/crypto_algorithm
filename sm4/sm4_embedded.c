@@ -40,31 +40,6 @@ static const uint32_t CK[32] = {0x00070e15, 0x1c232a31, 0x383f464d, 0x545b6269,
                                 0x10171e25, 0x2c333a41, 0x484f565d, 0x646b7279};
 
 /**
- * @brief 将X循环左移n位
- *
- * @param
- * @param n
- * @return uint32_t
- */
-static inline uint32_t rotl32(uint32_t X, int n)
-{
-    return (X << n) | (X >> (32 - n));
-}
-#define LEFTROTATE32(X, n) (((X) << (n)) | ((X) >> (32 - (n))))
-
-/**
- * @brief 获取32位数据第i个字节的值，X=(x0 x1 x2 x3)
- *
- * @param X
- * @param i
- * @return uint8_t
- */
-static inline uint8_t byte_at(uint32_t X, int i)
-{
-    return (X >> (24 - i * 8)) & 0xff;
-}
-
-/**
  * @brief uint8数组转uint32数组
  *
  * @param X uint8数组，长度128bit
@@ -95,76 +70,27 @@ static void u32_2_u8_128(const uint32_t *X, uint8_t *Y)
     }
 }
 
-/**
- * @brief 非线性变换 tau
- *
- * @param A
- * @return uint32_t
- */
-static inline uint32_t tau(uint32_t A)
-{
-    return (uint32_t)(Sbox[(A >> 24) & 0xff] << 24) | (Sbox[(A >> 16) & 0xff] << 16) | (Sbox[(A >> 8) & 0xff] << 8) | Sbox[A & 0xff];
-}
-#define TAU(A) ((Sbox[((A) >> 24) & 0xff] << 24) | (Sbox[((A) >> 16) & 0xff] << 16) | (Sbox[((A) >> 8) & 0xff] << 8) | Sbox[(A) & 0xff])
+#define LEFT_ROTATE32(X, n) (((X) << (n)) | ((X) >> (32 - (n))))
 
-/**
- * @brief 线性变换 L
- *
- * @param B
- * @return uint32_t
- */
-static inline uint32_t L(uint32_t B)
-{
-    return B ^ LEFTROTATE32(B, 2) ^ LEFTROTATE32(B, 10) ^ LEFTROTATE32(B, 18) ^ LEFTROTATE32(B, 24);
-}
+#define tau(A) ((Sbox[((A) >> 24) & 0xff] << 24) | (Sbox[((A) >> 16) & 0xff] << 16) | (Sbox[((A) >> 8) & 0xff] << 8) | Sbox[(A) & 0xff])
 
-/**
- * @brief 合成置换 T
- *
- * @param A
- * @return uint32_t
- */
+#define L(B) ((B) ^ LEFT_ROTATE32((B), 2) ^ LEFT_ROTATE32((B), 10) ^ LEFT_ROTATE32((B), 18) ^ LEFT_ROTATE32((B), 24))
+
 static inline uint32_t T(uint32_t A)
 {
-    return L(tau(A));
+    uint32_t tau_A = tau(A);
+    return L(tau_A);
 }
 
-/**
- * @brief 线性变换 L'
- *
- * @param B
- * @return uint32_t
- */
-static inline uint32_t LT(uint32_t B)
-{
-    return B ^ LEFTROTATE32(B, 13) ^ LEFTROTATE32(B, 23);
-}
+#define LT(B) ((B) ^ LEFT_ROTATE32((B), 13) ^ LEFT_ROTATE32((B), 23))
 
-/**
- * @brief 合成置换 T'
- *
- * @param A
- * @return uint32_t
- */
 static inline uint32_t TT(uint32_t A)
 {
-    return LT(tau(A));
+    uint32_t tau_A = tau(A);
+    return LT(tau_A);
 }
 
-/**
- * @brief 轮函数 F
- *
- * @param X0
- * @param X1
- * @param X2
- * @param X3
- * @param rk
- * @return uint32_t
- */
-static inline uint32_t F(uint32_t X0, uint32_t X1, uint32_t X2, uint32_t X3, uint32_t rk)
-{
-    return X0 ^ T(X1 ^ X2 ^ X3 ^ rk);
-}
+#define F(X0, X1, X2, X3, rk) ((X0) ^ (T((X1) ^ (X2) ^ (X3) ^ (rk))))
 
 /**
  * @brief 加密算法
@@ -182,10 +108,39 @@ static void encrypt(const uint32_t *X, const uint32_t *rk, uint32_t *Y)
     XT[3] = X[3];
 
     // 32次迭代运算
-    for (int i = 0; i < 32; i++)
-    {
-        XT[i + 4] = F(XT[i], XT[i + 1], XT[i + 2], XT[i + 3], rk[i]);
-    }
+    XT[4] = F(XT[0], XT[1], XT[2], XT[3], rk[0]);
+    XT[5] = F(XT[1], XT[2], XT[3], XT[4], rk[1]);
+    XT[6] = F(XT[2], XT[3], XT[4], XT[5], rk[2]);
+    XT[7] = F(XT[3], XT[4], XT[5], XT[6], rk[3]);
+    XT[8] = F(XT[4], XT[5], XT[6], XT[7], rk[4]);
+    XT[9] = F(XT[5], XT[6], XT[7], XT[8], rk[5]);
+    XT[10] = F(XT[6], XT[7], XT[8], XT[9], rk[6]);
+    XT[11] = F(XT[7], XT[8], XT[9], XT[10], rk[7]);
+    XT[12] = F(XT[8], XT[9], XT[10], XT[11], rk[8]);
+    XT[13] = F(XT[9], XT[10], XT[11], XT[12], rk[9]);
+    XT[14] = F(XT[10], XT[11], XT[12], XT[13], rk[10]);
+    XT[15] = F(XT[11], XT[12], XT[13], XT[14], rk[11]);
+    XT[16] = F(XT[12], XT[13], XT[14], XT[15], rk[12]);
+    XT[17] = F(XT[13], XT[14], XT[15], XT[16], rk[13]);
+    XT[18] = F(XT[14], XT[15], XT[16], XT[17], rk[14]);
+    XT[19] = F(XT[15], XT[16], XT[17], XT[18], rk[15]);
+    XT[20] = F(XT[16], XT[17], XT[18], XT[19], rk[16]);
+    XT[21] = F(XT[17], XT[18], XT[19], XT[20], rk[17]);
+    XT[22] = F(XT[18], XT[19], XT[20], XT[21], rk[18]);
+    XT[23] = F(XT[19], XT[20], XT[21], XT[22], rk[19]);
+    XT[24] = F(XT[20], XT[21], XT[22], XT[23], rk[20]);
+    XT[25] = F(XT[21], XT[22], XT[23], XT[24], rk[21]);
+    XT[26] = F(XT[22], XT[23], XT[24], XT[25], rk[22]);
+    XT[27] = F(XT[23], XT[24], XT[25], XT[26], rk[23]);
+    XT[28] = F(XT[24], XT[25], XT[26], XT[27], rk[24]);
+    XT[29] = F(XT[25], XT[26], XT[27], XT[28], rk[25]);
+    XT[30] = F(XT[26], XT[27], XT[28], XT[29], rk[26]);
+    XT[31] = F(XT[27], XT[28], XT[29], XT[30], rk[27]);
+    XT[32] = F(XT[28], XT[29], XT[30], XT[31], rk[28]);
+    XT[33] = F(XT[29], XT[30], XT[31], XT[32], rk[29]);
+    XT[34] = F(XT[30], XT[31], XT[32], XT[33], rk[30]);
+    XT[35] = F(XT[31], XT[32], XT[33], XT[34], rk[31]);
+
     // 反序变换
     Y[0] = XT[35];
     Y[1] = XT[34];
@@ -209,10 +164,39 @@ static void decrypt(const uint32_t *X, const uint32_t *rk, uint32_t *Y)
     XT[3] = X[3];
 
     // 32次迭代运算
-    for (int i = 0; i < 32; i++)
-    {
-        XT[i + 4] = F(XT[i], XT[i + 1], XT[i + 2], XT[i + 3], rk[31 - i]);
-    }
+    XT[4] = F(XT[0], XT[1], XT[2], XT[3], rk[31]);
+    XT[5] = F(XT[1], XT[2], XT[3], XT[4], rk[30]);
+    XT[6] = F(XT[2], XT[3], XT[4], XT[5], rk[29]);
+    XT[7] = F(XT[3], XT[4], XT[5], XT[6], rk[28]);
+    XT[8] = F(XT[4], XT[5], XT[6], XT[7], rk[27]);
+    XT[9] = F(XT[5], XT[6], XT[7], XT[8], rk[26]);
+    XT[10] = F(XT[6], XT[7], XT[8], XT[9], rk[25]);
+    XT[11] = F(XT[7], XT[8], XT[9], XT[10], rk[24]);
+    XT[12] = F(XT[8], XT[9], XT[10], XT[11], rk[23]);
+    XT[13] = F(XT[9], XT[10], XT[11], XT[12], rk[22]);
+    XT[14] = F(XT[10], XT[11], XT[12], XT[13], rk[21]);
+    XT[15] = F(XT[11], XT[12], XT[13], XT[14], rk[20]);
+    XT[16] = F(XT[12], XT[13], XT[14], XT[15], rk[19]);
+    XT[17] = F(XT[13], XT[14], XT[15], XT[16], rk[18]);
+    XT[18] = F(XT[14], XT[15], XT[16], XT[17], rk[17]);
+    XT[19] = F(XT[15], XT[16], XT[17], XT[18], rk[16]);
+    XT[20] = F(XT[16], XT[17], XT[18], XT[19], rk[15]);
+    XT[21] = F(XT[17], XT[18], XT[19], XT[20], rk[14]);
+    XT[22] = F(XT[18], XT[19], XT[20], XT[21], rk[13]);
+    XT[23] = F(XT[19], XT[20], XT[21], XT[22], rk[12]);
+    XT[24] = F(XT[20], XT[21], XT[22], XT[23], rk[11]);
+    XT[25] = F(XT[21], XT[22], XT[23], XT[24], rk[10]);
+    XT[26] = F(XT[22], XT[23], XT[24], XT[25], rk[9]);
+    XT[27] = F(XT[23], XT[24], XT[25], XT[26], rk[8]);
+    XT[28] = F(XT[24], XT[25], XT[26], XT[27], rk[7]);
+    XT[29] = F(XT[25], XT[26], XT[27], XT[28], rk[6]);
+    XT[30] = F(XT[26], XT[27], XT[28], XT[29], rk[5]);
+    XT[31] = F(XT[27], XT[28], XT[29], XT[30], rk[4]);
+    XT[32] = F(XT[28], XT[29], XT[30], XT[31], rk[3]);
+    XT[33] = F(XT[29], XT[30], XT[31], XT[32], rk[2]);
+    XT[34] = F(XT[30], XT[31], XT[32], XT[33], rk[1]);
+    XT[35] = F(XT[31], XT[32], XT[33], XT[34], rk[0]);
+
     // 反序变换
     Y[0] = XT[35];
     Y[1] = XT[34];
@@ -267,9 +251,15 @@ void SM4_Encrypt(const uint8_t *key, const uint8_t *in, int inlen, uint8_t *out)
     uint32_t P[4], C[4];
     SM4_KeySchedule(key, rk);
 
-    for(int i=0;i<8;i++)
+    for(int i=0;i<4;i++)
     {
-        printf("rk[%d] = 0x%08x \n",i,rk[i]);
+        printf("rk[%d] = %08x\n",i,rk[i]);
+    }
+    uint8_t rk_bytes[16];
+    u32_2_u8_128(rk, rk_bytes);
+    for(int i=0;i<4;i++)
+    {
+        printf("rk[%d] = %d %d %d %d\n",i,rk_bytes[4*i+0],rk_bytes[4*i+1],rk_bytes[4*i+2],rk_bytes[4*i+3]);
     }
 
     for (int i = 0; i < inlen / 16; i++)
