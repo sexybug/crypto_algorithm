@@ -103,9 +103,11 @@ static void u32_2_u8_128(const uint32_t *X, uint8_t *Y)
  */
 static inline uint32_t tau(uint32_t A)
 {
-    return (uint32_t)(Sbox[(A >> 24) & 0xff] << 24) | (Sbox[(A >> 16) & 0xff] << 16) | (Sbox[(A >> 8) & 0xff] << 8) | Sbox[A & 0xff];
+    return ((uint32_t)Sbox[(A >> 24) & 0xff] << 24) | ((uint32_t)Sbox[(A >> 16) & 0xff] << 16)
+     | ((uint32_t)Sbox[(A >> 8) & 0xff] << 8) | (uint32_t)Sbox[A & 0xff];
 }
-#define TAU(A) ((Sbox[((A) >> 24) & 0xff] << 24) | (Sbox[((A) >> 16) & 0xff] << 16) | (Sbox[((A) >> 8) & 0xff] << 8) | Sbox[(A) & 0xff])
+
+#define TAU(A) (((uint32_t)Sbox[((A) >> 24) & 0xff] << 24) | ((uint32_t)Sbox[((A) >> 16) & 0xff] << 16) | ((uint32_t)Sbox[((A) >> 8) & 0xff] << 8) | (uint32_t)Sbox[(A) & 0xff])
 
 /**
  * @brief 线性变换 L
@@ -267,10 +269,10 @@ void SM4_Encrypt(const uint8_t *key, const uint8_t *in, int inlen, uint8_t *out)
     uint32_t P[4], C[4];
     SM4_KeySchedule(key, rk);
 
-    for(int i=0;i<8;i++)
-    {
-        printf("rk[%d] = 0x%08x \n",i,rk[i]);
-    }
+    // for(int i=0;i<8;i++)
+    // {
+    //     printf("rk[%d] = 0x%08x \n",i,rk[i]);
+    // }
 
     for (int i = 0; i < inlen / 16; i++)
     {
