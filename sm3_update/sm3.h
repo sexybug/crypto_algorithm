@@ -15,8 +15,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define SM3_BLOCK_SIZE 64
-
 typedef struct
 {
     uint32_t digest[8];

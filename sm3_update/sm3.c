@@ -1,6 +1,8 @@
 #include "sm3.h"
 #include <string.h>
 
+#define SM3_BLOCK_SIZE 64
+
 static const uint32_t IV[8] = {0x7380166F, 0x4914B2B9, 0x172442D7, 0xDA8A0600, 0xA96F30BC, 0x163138AA, 0xE38DEE4D, 0xB0FB0E4E};
 static const uint32_t T0 = 0x79CC4519;
 static const uint32_t T1 = 0x7A879D8A;
